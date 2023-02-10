@@ -9,8 +9,8 @@ import java.util.List;
 @ApplicationScoped
 public class UserRepository implements PanacheMongoRepository<User> {
 
-    public User findByName(String name) {
-        return find("name", name).firstResult();
+    public User findByUser(String userName) {
+        return find("userName", userName).firstResult();
     }
 
     public List<User> getAll() {

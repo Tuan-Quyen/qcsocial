@@ -15,4 +15,13 @@ public class UserService {
     public List<User> findAll() {
         return userRepo.getAll();
     }
+
+    public User register(User user) {
+        var isCheckExist = userRepo.findByUser(user.getUserName());
+        if (isCheckExist != null) {
+            throw new RuntimeException(String.format("UserName '%s' already used.", user.getUserName()));
+        }
+        user.persistOrUpdate();
+        return user;
+    }
 }
