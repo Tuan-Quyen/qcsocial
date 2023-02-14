@@ -13,6 +13,10 @@ public class UserRepository implements PanacheMongoRepository<User> {
         return find("userName", userName).firstResult();
     }
 
+    public boolean login(String userName, String password) {
+        return find("userName = ?1 & passWord = ?2", userName, password).firstResult() != null;
+    }
+
     public List<User> getAll() {
         return listAll();
     }
