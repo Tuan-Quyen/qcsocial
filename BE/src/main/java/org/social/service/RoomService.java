@@ -1,22 +1,32 @@
 package org.social.service;
 
 import org.bson.types.ObjectId;
+import org.social.helper.RoomHelper;
+import org.social.helper.UserHelper;
 import org.social.model.room.Room;
 import org.social.model.exception.ConflictException;
 import org.social.model.exception.NotFoundException;
+import org.social.model.room.RoomVO;
 import org.social.repository.RoomRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.List;
 
 @ApplicationScoped
 public class RoomService {
     @Inject
+    UserService userService;
+    @Inject
     RoomRepository roomRepo;
 
-    public List<Room> findAll() {
-        return roomRepo.getAll();
+    public List<RoomVO> findAll() {
+        return roomRepo.getAll().stream().map(entity -> {
+            var vo = RoomHelper.toVO(entity);
+            injectUser(entity.getExistUser(), vo);
+            return vo;
+        }).toList();
     }
 
     public Room findByName(String name) {
@@ -36,19 +46,23 @@ public class RoomService {
         return room;
     }
 
-    public Room register(Room room) {
-        var entity = roomRepo.findByName(room.getName());
+    public Room create(RoomVO vo) {
+        var entity = roomRepo.findByName(vo.getName());
         if (entity != null) {
-            throw new ConflictException(String.format("Room name '%s' already used.", room.getName()));
+            throw new ConflictException(String.format("Room name '%s' already used.", vo.getName()));
         }
-        roomRepo.persistOrUpdate(room);
-        return room;
+        userService.findByUser(vo.getUserHost());
+        entity = RoomHelper.toEntity(vo, null);
+        entity.setExistUser(Collections.singletonList(vo.getUserHost()));
+        entity.persistOrUpdate();
+        return entity;
     }
 
-    public Room update(Room room) {
-        findByName(room.getName());
-        roomRepo.update(room);
-        return room;
+    public Room update(RoomVO room) {
+        var entity = findByName(room.getName());
+        RoomHelper.toEntity(room, entity);
+        entity.persistOrUpdate();
+        return entity;
     }
 
     public void deleteByName(String name) {
@@ -59,5 +73,10 @@ public class RoomService {
     public void deleteById(String id) {
         var entity = findById(id);
         roomRepo.delete(entity);
+    }
+
+    public void injectUser(List<String> userId, RoomVO vo) {
+        var users = userService.userRepo.findByIds(userId).stream().map(UserHelper::toVO).toList();
+        vo.setExistUser(users);
     }
 }

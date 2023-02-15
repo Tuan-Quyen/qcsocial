@@ -20,4 +20,8 @@ public class UserRepository implements PanacheMongoRepository<User> {
     public List<User> getAll() {
         return listAll();
     }
+
+    public List<User> findByIds(List<String> ids) {
+        return find("id in ?1", ids).list();
+    }
 }

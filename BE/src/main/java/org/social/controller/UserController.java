@@ -2,7 +2,9 @@ package org.social.controller;
 
 import io.quarkus.security.UnauthorizedException;
 import io.smallrye.mutiny.Uni;
+import org.social.helper.UserHelper;
 import org.social.model.user.User;
+import org.social.model.user.UserVO;
 import org.social.service.UserService;
 
 import javax.inject.Inject;
@@ -12,7 +14,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/users")
-public class UserController extends BaseController<User> {
+public class UserController extends BaseController<UserVO> {
     @Inject
     UserService userService;
 
@@ -32,25 +34,25 @@ public class UserController extends BaseController<User> {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> register(User user) {
-        return resCreate(user);
+    public Uni<Response> register(UserVO vo) {
+        return resCreate(vo);
     }
 
     @POST
     @Path("/login")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> login(User user) {
-        return Uni.createFrom().item(user)
-                .onItem().invoke(data -> userService.handleLogin(user.getUserName(), user.getPassword()))
-                .onItem().transform(data -> Response.ok(data.id).build())
+    public Uni<Response> login(UserVO vo) {
+        return Uni.createFrom().item(vo)
+                .onItem().invoke(data -> userService.handleLogin(vo.getUserName(), vo.getPassword()))
+                .onItem().transform(this::fetched)
                 .onFailure(UnauthorizedException.class).recoverWithItem(ex -> unAuthorized(ex.getMessage()))
                 .onFailure().recoverWithItem(ex -> internal(ex.getMessage()));
     }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> update(User user) {
-        return resUpdate(user);
+    public Uni<Response> update(UserVO vo) {
+        return resUpdate(vo);
     }
 
     @DELETE
@@ -63,26 +65,29 @@ public class UserController extends BaseController<User> {
     }
 
     @Override
-    protected List<User> handleFindAll() {
-        return userService.findAll();
+    protected List<UserVO> handleFindAll() {
+        return userService.findAll().stream().map(UserHelper::toVO).toList();
     }
 
     @Override
-    protected User handleFindBy(String query, Object object) {
+    protected UserVO handleFindBy(String query, Object object) {
+        User user;
         if (query.equals("id")) {
-            return userService.findById(String.valueOf(object));
+            user = userService.findById(String.valueOf(object));
+        } else {
+            user = userService.findByUser(String.valueOf(object));
         }
-        return userService.findByUser(String.valueOf(object));
+        return UserHelper.toVO(user);
     }
 
     @Override
-    protected User handleCreate(User user) {
-        return userService.register(user);
+    protected UserVO handleCreate(UserVO user) {
+        return UserHelper.toVO(userService.register(user));
     }
 
     @Override
-    protected User handleUpdate(User user) {
-        return userService.update(user);
+    protected UserVO handleUpdate(UserVO user) {
+        return UserHelper.toVO(userService.update(user));
     }
 
     @Override

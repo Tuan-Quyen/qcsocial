@@ -1,7 +1,9 @@
 package org.social.controller;
 
 import io.smallrye.mutiny.Uni;
+import org.social.helper.RoomHelper;
 import org.social.model.room.Room;
+import org.social.model.room.RoomVO;
 import org.social.service.RoomService;
 
 import javax.inject.Inject;
@@ -11,7 +13,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/rooms")
-public class RoomController extends BaseController<Room> {
+public class RoomController extends BaseController<RoomVO> {
     @Inject
     RoomService roomService;
 
@@ -31,14 +33,14 @@ public class RoomController extends BaseController<Room> {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> create(Room room) {
-        return resCreate(room);
+    public Uni<Response> create(RoomVO vo) {
+        return resCreate(vo);
     }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> update(Room room) {
-        return resUpdate(room);
+    public Uni<Response> update(RoomVO vo) {
+        return resUpdate(vo);
     }
 
     @DELETE
@@ -51,26 +53,37 @@ public class RoomController extends BaseController<Room> {
     }
 
     @Override
-    protected List<Room> handleFindAll() {
+    protected List<RoomVO> handleFindAll() {
         return roomService.findAll();
     }
 
     @Override
-    protected Room handleFindBy(String query, Object object) {
+    protected RoomVO handleFindBy(String query, Object object) {
+        Room room;
         if (query.equals("id")) {
-            return roomService.findById(String.valueOf(object));
+            room = roomService.findById(String.valueOf(object));
+        } else {
+            room = roomService.findByName(String.valueOf(object));
         }
-        return roomService.findByName(String.valueOf(object));
+        var vo = RoomHelper.toVO(room);
+        roomService.injectUser(room.getExistUser(), vo);
+        return vo;
     }
 
     @Override
-    protected Room handleCreate(Room room) {
-        return roomService.register(room);
+    protected RoomVO handleCreate(RoomVO vo) {
+        var room = roomService.create(vo);
+        var res = RoomHelper.toVO(room);
+        roomService.injectUser(room.getExistUser(), res);
+        return res;
     }
 
     @Override
-    protected Room handleUpdate(Room room) {
-        return roomService.update(room);
+    protected RoomVO handleUpdate(RoomVO vo) {
+        var room = roomService.update(vo);
+        var res = RoomHelper.toVO(room);
+        roomService.injectUser(room.getExistUser(), res);
+        return res;
     }
 
     @Override

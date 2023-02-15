@@ -2,9 +2,11 @@ package org.social.service;
 
 import io.quarkus.security.UnauthorizedException;
 import org.bson.types.ObjectId;
+import org.social.helper.UserHelper;
 import org.social.model.user.User;
 import org.social.model.exception.ConflictException;
 import org.social.model.exception.NotFoundException;
+import org.social.model.user.UserVO;
 import org.social.repository.UserRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -37,19 +39,21 @@ public class UserService {
         return user;
     }
 
-    public User register(User user) {
-        var entity = userRepo.findByUser(user.getUserName());
+    public User register(UserVO user) {
+        User entity = userRepo.findByUser(user.getUserName());
         if (entity != null) {
             throw new ConflictException(String.format("UserName '%s' already used.", user.getUserName()));
         }
-        userRepo.persistOrUpdate(user);
-        return user;
+        entity = UserHelper.toEntity(user, null);
+        entity.persistOrUpdate();
+        return entity;
     }
 
-    public User update(User user) {
-        findByUser(user.getUserName());
-        userRepo.update(user);
-        return user;
+    public User update(UserVO user) {
+        User entity = findByUser(user.getUserName());
+        entity = UserHelper.toEntity(user, entity);
+        entity.persistOrUpdate();
+        return entity;
     }
 
     public void deleteByName(String userName) {
