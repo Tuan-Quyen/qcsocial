@@ -1,4 +1,4 @@
-package org.social.model;
+package org.social.model.room;
 
 import io.quarkus.mongodb.panache.PanacheMongoEntity;
 import io.quarkus.mongodb.panache.common.MongoEntity;

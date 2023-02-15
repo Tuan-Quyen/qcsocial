@@ -1,7 +1,7 @@
 package org.social.service;
 
 import org.bson.types.ObjectId;
-import org.social.model.Room;
+import org.social.model.room.Room;
 import org.social.model.exception.ConflictException;
 import org.social.model.exception.NotFoundException;
 import org.social.repository.RoomRepository;

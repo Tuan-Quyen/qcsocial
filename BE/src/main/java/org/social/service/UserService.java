@@ -2,7 +2,7 @@ package org.social.service;
 
 import io.quarkus.security.UnauthorizedException;
 import org.bson.types.ObjectId;
-import org.social.model.User;
+import org.social.model.user.User;
 import org.social.model.exception.ConflictException;
 import org.social.model.exception.NotFoundException;
 import org.social.repository.UserRepository;

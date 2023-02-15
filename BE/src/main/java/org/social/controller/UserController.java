@@ -2,7 +2,7 @@ package org.social.controller;
 
 import io.quarkus.security.UnauthorizedException;
 import io.smallrye.mutiny.Uni;
-import org.social.model.User;
+import org.social.model.user.User;
 import org.social.service.UserService;
 
 import javax.inject.Inject;

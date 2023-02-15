@@ -1,4 +1,4 @@
-package org.social.model;
+package org.social.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.quarkus.mongodb.panache.PanacheMongoEntity;
@@ -15,9 +15,4 @@ public class User extends PanacheMongoEntity {
     private String password;
     private String email;
     private boolean isOnline;
-
-    @JsonIgnore
-    public String getPassword() {
-        return password;
-    }
 }

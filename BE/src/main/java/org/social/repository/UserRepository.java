@@ -1,7 +1,7 @@
 package org.social.repository;
 
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
-import org.social.model.User;
+import org.social.model.user.User;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.List;

@@ -1,7 +1,7 @@
 package org.social.controller;
 
 import io.smallrye.mutiny.Uni;
-import org.social.model.Room;
+import org.social.model.room.Room;
 import org.social.service.RoomService;
 
 import javax.inject.Inject;
@@ -64,18 +64,18 @@ public class RoomController extends BaseController<Room> {
     }
 
     @Override
-    protected Room handleCreate(Room Room) {
-        return roomService.register(Room);
+    protected Room handleCreate(Room room) {
+        return roomService.register(room);
     }
 
     @Override
-    protected Room handleUpdate(Room Room) {
-        return roomService.update(Room);
+    protected Room handleUpdate(Room room) {
+        return roomService.update(room);
     }
 
     @Override
-    protected void handleDelete(String RoomName) {
-        roomService.deleteByName(RoomName);
+    protected void handleDelete(String name) {
+        roomService.deleteByName(name);
     }
 
     @Override
