@@ -78,7 +78,7 @@
           if (! connected) {
               var name = $("#name").val();
               console.log("Val: " + name);
-              socket = new WebSocket("ws://192.168.70.138:8077" + "/chat/" + name);
+              socket = new WebSocket("ws://192.168.70.138:8077" + "/chat/room/63ecbffe7c7dda063f67ecb0/user/" + name);
               socket.onopen = function() {
                   connected = true;
                   console.log("Connected to the web socket");
@@ -100,7 +100,7 @@
               var value = $("#msg").val();
               console.log("Sending " + value);
               socket.send(JSON.stringify({event: "SEND_MESSAGE", data: value}));
-              $("#msg").val("");
+              //$("#msg").val("");
           }
       };
 
