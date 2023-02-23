@@ -10,15 +10,15 @@ public class SocketEvent {
     public SocketEvent() {
     }
 
-    public SocketEvent(Event event, Object data) {
+    public SocketEvent(Event event) {
         this.event = event;
-        this.data = data;
     }
 
     public enum Event {
         CONNECTED,
         JOIN_ROOM,
-        OUT_ROOM,
+        ERROR,
+        FETCH_MESSAGE,
         DISCONNECTED,
         SEND_MESSAGE,
         DELETE_MESSAGE

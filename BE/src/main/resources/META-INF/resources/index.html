@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Quarkus Chat!</title>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly-additions.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly-additions.min.css">
 
     <style>
         #chat {
@@ -14,6 +16,8 @@
           min-height: 300px;
           max-height: 300px;
       }
+
+
     </style>
 </head>
 
@@ -27,6 +31,9 @@
 </nav>
 <div class="container">
     <br/>
+    <div class="row">
+        <input id="room" class="col-md-4" type="text" placeholder="room id" value="63f714391ada7255a964b87f">
+    </div>
     <div class="row">
         <input id="name" class="col-md-4" type="text" placeholder="your name">
         <button id="connect" class="col-md-1 btn btn-primary" type="button">connect</button>
@@ -75,15 +82,17 @@
       });
 
       var connect = function() {
-          if (! connected) {
+          //if (! connected) {
               var name = $("#name").val();
-              console.log("Val: " + name);
-              socket = new WebSocket("ws://192.168.70.138:8077" + "/chat/room/63ecbffe7c7dda063f67ecb0/user/" + name);
+              var room = $("#room").val();
+              console.log("User id: " + name);
+              console.log("Room id: " + room);
+              socket = new WebSocket("ws://192.168.70.138:8077" + "/chat/room/" + room + "/user/" + name);
               socket.onopen = function() {
                   connected = true;
                   console.log("Connected to the web socket");
                   $("#send").attr("disabled", false);
-                  $("#connect").attr("disabled", true);
+                  //$("#connect").attr("disabled", true);
                   $("#name").attr("disabled", true);
                   $("#msg").focus();
               };
@@ -92,14 +101,30 @@
                   $("#chat").append(m.data + "\n");
                   scrollToBottom();
               };
-          }
+          //}
       };
+
+      function genHexString(len) {
+        let output = '';
+        for (let i = 0; i < len; ++i) {
+            output += (Math.floor(Math.random() * 16)).toString(16);
+        }
+        return output;
+    }
 
       var sendMessage = function() {
           if (connected) {
               var value = $("#msg").val();
-              console.log("Sending " + value);
-              socket.send(JSON.stringify({event: "SEND_MESSAGE", data: value}));
+              var name = $("#name").val();
+              var room = $("#room").val();
+              console.log("User " + name + " | Sending " + value);
+              var data = JSON.stringify({event: "SEND_MESSAGE", data: {
+                message: value,
+                userId: name,//genHexString(24),
+                roomId: room
+              }});
+              console.log("message: " + data);
+              socket.send(data);
               //$("#msg").val("");
           }
       };
@@ -108,7 +133,9 @@
         $('#chat').scrollTop($('#chat')[0].scrollHeight);
       };
 
-    </script>
+
+
+</script>
 </body>
 
 </html>

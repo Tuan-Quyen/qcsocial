@@ -8,6 +8,7 @@ import org.social.model.exception.ConflictException;
 import org.social.model.exception.NotFoundException;
 import org.social.model.room.RoomVO;
 import org.social.repository.RoomRepository;
+import org.social.repository.UserRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,6 +21,8 @@ public class RoomService {
     UserService userService;
     @Inject
     RoomRepository roomRepo;
+    @Inject
+    UserRepository userRepo;
 
     public List<RoomVO> findAll() {
         return roomRepo.getAll().stream().map(entity -> {
@@ -51,9 +54,9 @@ public class RoomService {
         if (entity != null) {
             throw new ConflictException(String.format("Room name '%s' already used.", vo.getName()));
         }
-        userService.findByUser(vo.getUserHost());
+        var user = userService.findByUser(vo.getUserHost());
         entity = RoomHelper.toEntity(vo, null);
-        entity.setExistUser(Collections.singletonList(vo.getUserHost()));
+        entity.setExistUser(Collections.singletonList(user.id));
         entity.persistOrUpdate();
         return entity;
     }
@@ -63,6 +66,19 @@ public class RoomService {
         RoomHelper.toEntity(room, entity);
         entity.persistOrUpdate();
         return entity;
+    }
+
+    public RoomVO insertUser(String roomId, String userId) {
+        var entity = findById(roomId);
+        var user = userService.findById(userId);
+        boolean isExisted = entity.getExistUser().contains(user.id);
+        if (!isExisted) {
+            entity.getExistUser().add(user.id);
+        }
+        entity.persistOrUpdate();
+        var vo = RoomHelper.toVO(entity);
+        injectUser(entity.getExistUser(), vo);
+        return vo;
     }
 
     public void deleteByName(String name) {
@@ -75,8 +91,8 @@ public class RoomService {
         roomRepo.delete(entity);
     }
 
-    public void injectUser(List<String> userId, RoomVO vo) {
-        var users = userService.userRepo.findByIds(userId).stream().map(UserHelper::toVO).toList();
+    public void injectUser(List<ObjectId> userId, RoomVO vo) {
+        var users = userRepo.findByIds(userId).stream().map(UserHelper::toVO).toList();
         vo.setExistUser(users);
     }
 }

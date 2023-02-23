@@ -1,6 +1,7 @@
 package org.social.repository;
 
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
+import org.bson.types.ObjectId;
 import org.social.model.user.User;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -21,7 +22,7 @@ public class UserRepository implements PanacheMongoRepository<User> {
         return listAll();
     }
 
-    public List<User> findByIds(List<String> ids) {
+    public List<User> findByIds(List<ObjectId> ids) {
         return find("id in ?1", ids).list();
     }
 }

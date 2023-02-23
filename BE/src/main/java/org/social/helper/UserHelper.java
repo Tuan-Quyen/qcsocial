@@ -4,6 +4,9 @@ import org.social.model.user.User;
 import org.social.model.user.UserVO;
 
 public class UserHelper {
+    private UserHelper() {
+    }
+
     public static User toEntity(UserVO vo, User entity) {
         if (entity == null) {
             entity = new User();
@@ -20,7 +23,6 @@ public class UserHelper {
         vo.setName(entity.getName());
         vo.setEmail(vo.getEmail());
         vo.setUserName(entity.getUserName());
-        vo.setPassword(entity.getPassword());
         return vo;
     }
 }

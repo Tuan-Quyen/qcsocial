@@ -36,10 +36,20 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _controller = TextEditingController();
   var _channel = WebSocketChannel.connect(Uri.parse(
-      'ws://localhost:8077/chat/room/63ecbffe7c7dda063f67ecb0/user/63e610089ac3f82b3142c12b'));
+      'ws://192.168.70.138:8077/chat/room/63ecbffe7c7dda063f67ecb0/user/63e610089ac3f82b3142c12b'));
+  late Stream _stream;
+
+  @override
+  void initState() {
+    super.initState();
+    _stream = _channel.stream.asBroadcastStream();
+  }
 
   @override
   Widget build(BuildContext context) {
+    _stream.listen((event) {
+      print("Stream listen:" + event);
+    });
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -57,7 +67,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 24),
             StreamBuilder(
-              stream: _channel.stream,
+              stream: _stream,
               builder: (context, snapshot) {
                 return Text(snapshot.hasData ? '${snapshot.data}' : '');
               },
@@ -98,7 +108,8 @@ class _HomePageState extends State<HomePage> {
     _channel.sink.close();
     setState(() {
       _channel = WebSocketChannel.connect(Uri.parse(
-          'ws://localhost:8077/chat/room/63ecbffe7c7dda063f67ecb0/user/63e610089ac3f82b3142c12b'));
+          'ws://192.168.70.138:8077/chat/room/63ecbffe7c7dda063f67ecb0/user/63e610089ac3f82b3142c12b'));
+      _stream = _channel.stream.asBroadcastStream();
     });
   }
 
