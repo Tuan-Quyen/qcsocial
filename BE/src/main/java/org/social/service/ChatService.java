@@ -11,9 +11,7 @@ import org.social.repository.ChatRepository;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @ApplicationScoped
 public class ChatService {
@@ -27,19 +25,25 @@ public class ChatService {
         return chatRepo.getAll(new ObjectId(roomId)).stream().map(this::convertVO).toList();
     }
 
-    @SneakyThrows
-    public ChatVO saveMessage(Object data) {
+    public ChatVO saveMessage(String userId, String roomId, Object data) {
         var receiveData = objectMapper.convertValue(data, ChatReceive.class);
         var entity = new Chat();
         entity.setMessage(receiveData.getMessage());
-        entity.setUserId(new ObjectId(receiveData.getUserId()));
-        entity.setRoomId(new ObjectId(receiveData.getRoomId()));
+        entity.setUserId(new ObjectId(userId));
+        entity.setRoomId(new ObjectId(roomId));
         entity.persistOrUpdate();
+        return convertVO(entity);
+    }
+
+    @SneakyThrows
+    public ChatVO deleteMessage(Object data) {
+        var entity = new Chat();
         return convertVO(entity);
     }
 
     private ChatVO convertVO(Chat entity) {
         var vo = new ChatVO();
+        vo.setId(entity.id.toString());
         vo.setMessage(entity.getMessage());
         vo.setRoomId(entity.getRoomId().toString());
         var user = userService.findById(entity.getUserId().toString());
@@ -57,6 +61,5 @@ public class ChatService {
 @Data
 class ChatReceive {
     private String message;
-    private String userId;
-    private String roomId;
+    private String payload;
 }

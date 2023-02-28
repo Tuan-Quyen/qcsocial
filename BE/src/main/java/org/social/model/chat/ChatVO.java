@@ -10,6 +10,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChatVO {
+    private String id;
     private String message;
     private Map<String, Object> user;
     private String roomId;

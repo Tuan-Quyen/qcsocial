@@ -34,17 +34,17 @@ public class ChatSocket {
     @OnClose
     public void onClose(@PathParam("roomId") String roomId, @PathParam("userId") String userId) {
         LOG.infof("Close> : Room %s | User %s", roomId, userId);
-        sessions.get(roomId).remove(userId);
         handleMessage(new SocketEvent(SocketEvent.Event.DISCONNECTED), roomId, userId);
+        sessions.get(roomId).remove(userId);
     }
 
     @OnError
     public void onError(@PathParam("roomId") String roomId, @PathParam("userId") String userId, Throwable throwable) {
         LOG.infof("Error> : Room %s | User %s | Throw %s", roomId, userId, throwable);
-        sessions.get(roomId).remove(userId);
         var socketEvent = new SocketEvent(SocketEvent.Event.ERROR);
         socketEvent.setData(throwable.getMessage());
         handleMessage(socketEvent, roomId, userId);
+        sessions.get(roomId).remove(userId);
     }
 
     @OnMessage
@@ -57,7 +57,7 @@ public class ChatSocket {
     private void handleMessage(SocketEvent socketEvent, String roomId, String userId) {
         switch (socketEvent.getEvent()) {
             case SEND_MESSAGE -> {
-                var chatData = chatSvc.saveMessage(socketEvent.getData());
+                var chatData = chatSvc.saveMessage(userId, roomId, socketEvent.getData());
                 socketEvent.setData(chatData);
                 broadcast(roomId, socketEvent);
             }
@@ -65,6 +65,10 @@ public class ChatSocket {
                 var chatData = chatSvc.findAll(roomId);
                 socketEvent.setData(chatData);
                 singleResponse(roomId, userId, socketEvent);
+            }
+            case DELETE_MESSAGE -> {
+                chatSvc.deleteMessage(socketEvent.getData());
+                broadcast(roomId, socketEvent);
             }
             case CONNECTED -> {
                 var roomData = roomSvc.insertUser(roomId, userId);
