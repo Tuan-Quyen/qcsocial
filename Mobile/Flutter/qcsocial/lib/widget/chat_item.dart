@@ -25,8 +25,10 @@ class ChatItem extends StatelessWidget {
           style: const TextStyle(fontStyle: FontStyle.italic),
         );
       default:
+        bool _isUserChat = chat.user.id == "63eca143a2ab7a2629d01bb6";
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              _isUserChat ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
@@ -36,23 +38,45 @@ class ChatItem extends StatelessWidget {
                   fontStyle: FontStyle.italic,
                   color: Colors.grey),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Card(
-                color: Colors.grey,
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(chat.message ?? ''),
+            Stack(
+              alignment: _isUserChat
+                  ? AlignmentDirectional.bottomEnd
+                  : AlignmentDirectional.bottomStart,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8,
+                    bottom: 20,
+                    right: 8,
+                  ),
+                  child: Card(
+                    color: _isUserChat ? Colors.blue : Colors.grey.shade200,
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Text(
+                        chat.message ?? '',
+                        style: TextStyle(
+                          color: _isUserChat ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(
+                  bottom: 10,
+                  //can be replace by avatar
+                  child: Container(
+                    width: 25,
+                    height: 25,
+                    decoration: ShapeDecoration(
+                        shape: const CircleBorder(),
+                        color: Colors.grey.shade400),
+                  ),
+                )
+              ],
             ),
-            Container(
-              width: 20,
-              height: 20,
-              decoration: const ShapeDecoration(
-                  shape: CircleBorder(), color: Colors.yellow),
-            )
           ],
         );
     }

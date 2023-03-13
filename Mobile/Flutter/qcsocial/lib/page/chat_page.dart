@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:qcsocial/model/SocketEvent.dart';
 
 import '../provider/chat_provider.dart';
 import '../localization/localize.dart';
@@ -29,6 +28,7 @@ class _ChatPageState extends State<ChatPage> {
         () => _chatProvider.connect(),
       )
       ..connect());
+    _controller.addListener(() => setState(() {}));
   }
 
   @override
@@ -48,55 +48,89 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    _actionMessage(text) {
+      _chatProvider.sendMessage(text);
+      _controller.clear();
+    }
+
+    Widget _viewMessage() {
+      return Expanded(
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(
+            scrollbars: false,
+          ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            reverse: true,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: _chatProvider.chats.length,
+            itemBuilder: (context, index) {
+              var listLength = _chatProvider.chats.length;
+              var reversedIndex =
+                  listLength == 0 ? listLength : listLength - 1 - index;
+              var chat = _chatProvider.chats[reversedIndex];
+              return ChatItem(chat: chat);
+            },
+          ),
+        ),
+      );
+    }
+
+    Widget _viewInputMessage() {
+      return TextField(
+        controller: _controller,
+        decoration: const InputDecoration(
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.only(
+            top: 10,
+            bottom: 10,
+            left: 20,
+            right: 10,
+          ),
+          labelText: 'Send a message',
+        ),
+        maxLines: 3,
+        minLines: 1,
+        onSubmitted:
+            _controller.text.isEmpty ? null : (text) => _actionMessage(text),
+      );
+    }
+
+    Widget _viewSendMessage() {
+      return Row(
+        children: [
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: _viewInputMessage(),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.send),
+            onPressed: _controller.text.isEmpty
+                ? null
+                : () => _actionMessage(_controller.text),
+          ),
+        ],
+      );
+    }
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(_modalArgument['name']),
       ),
-      body: RefreshIndicator(
-        onRefresh: () => _chatProvider.fetchChats(),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: const AlwaysScrollableScrollPhysics(),
-                reverse: true,
-                itemCount: _chatProvider.chats.length,
-                itemBuilder: (context, index) {
-                  var listLength = _chatProvider.chats.length;
-                  var reversedIndex =
-                      listLength == 0 ? listLength : listLength - 1 - index;
-                  var chat = _chatProvider.chats[reversedIndex];
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ChatItem(chat: chat),
-                  );
-                },
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Form(
-                    child: TextFormField(
-                      controller: _controller,
-                      decoration: const InputDecoration(
-                        labelText: 'Send a message',
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () {
-                    _chatProvider.sendMessage(_controller.text);
-                    _controller.clear();
-                  },
-                ),
-              ],
-            )
-          ],
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [_viewMessage(), _viewSendMessage()],
+          ),
         ),
       ),
     );

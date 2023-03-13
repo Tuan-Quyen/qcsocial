@@ -13,11 +13,12 @@ class ChatProvider extends ChangeNotifier {
 
   List<Chat> get chats => _chats;
 
-
   set onError(dynamic value) {
     _onError = value;
     notifyListeners();
   }
+
+
 
   init(String roomId) {
     _chatController = ChatController(roomId, "63eca143a2ab7a2629d01bb6");
