@@ -19,6 +19,7 @@ public class RoomHelper {
 
     public static RoomVO toVO(Room entity) {
         var vo = new RoomVO();
+        vo.setId(entity.id.toString());
         vo.setName(entity.getName());
         vo.setUserHost(entity.getUserHost());
         return vo;

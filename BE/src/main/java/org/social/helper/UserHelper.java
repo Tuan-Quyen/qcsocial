@@ -20,6 +20,7 @@ public class UserHelper {
 
     public static UserVO toVO(User entity) {
         var vo = new UserVO();
+        vo.setId(entity.id.toString());
         vo.setName(entity.getName());
         vo.setEmail(vo.getEmail());
         vo.setUserName(entity.getUserName());

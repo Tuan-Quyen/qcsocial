@@ -1,3 +1,4 @@
+/*
 import 'dart:collection';
 import 'dart:convert';
 
@@ -130,5 +131,51 @@ class _HomePageState extends State<HomePage> {
     _channel.sink.close();
     _controller.dispose();
     super.dispose();
+  }
+}
+*/
+
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'localization/localize.dart';
+import 'provider/setting_provider.dart';
+import 'utils/routes.dart';
+import 'widget/custom_widget.dart';
+
+void main() {
+  runApp(const App());
+}
+
+class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    late SettingProvider _settingProvider;
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => SettingProvider())
+      ],
+      builder: (context, child) {
+        _settingProvider = context.read<SettingProvider>();
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          locale: _settingProvider.locale,
+          localizationsDelegates: [
+            Localize().delegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: Localize().supportedLocales(),
+          theme: CustomWidget.themeData(),
+          darkTheme: CustomWidget.themeData(isDark: true),
+          themeMode: _settingProvider.themeMode,
+          initialRoute: RouteUtils.room,
+          routes: RouteUtils().routePages(),
+        );
+      },
+    );
   }
 }

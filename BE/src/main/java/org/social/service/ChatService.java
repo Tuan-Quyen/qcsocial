@@ -48,7 +48,7 @@ public class ChatService {
         vo.setRoomId(entity.getRoomId().toString());
         var user = userService.findById(entity.getUserId().toString());
         var userInfoMap = new HashMap<String, Object>();
-        userInfoMap.put("userId", user.id.toString());
+        userInfoMap.put("id", user.id.toString());
         userInfoMap.put("name", user.getName());
         userInfoMap.put("email", user.getEmail());
         vo.setUser(userInfoMap);

@@ -8,6 +8,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserVO {
+    private String id;
     private String name;
     private String userName;
     private String password;

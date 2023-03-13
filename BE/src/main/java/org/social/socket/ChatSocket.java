@@ -1,9 +1,11 @@
 package org.social.socket;
 
 import org.jboss.logging.Logger;
+import org.social.helper.UserHelper;
 import org.social.model.SocketEvent;
 import org.social.service.ChatService;
 import org.social.service.RoomService;
+import org.social.service.UserService;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,6 +22,9 @@ public class ChatSocket {
     ChatService chatSvc;
     @Inject
     RoomService roomSvc;
+    @Inject
+    UserService userSvc;
+
     private static final Logger LOG = Logger.getLogger(ChatSocket.class);
     Map<String, Map<String, Session>> sessions = new ConcurrentHashMap<>();
 
@@ -34,8 +39,8 @@ public class ChatSocket {
     @OnClose
     public void onClose(@PathParam("roomId") String roomId, @PathParam("userId") String userId) {
         LOG.infof("Close> : Room %s | User %s", roomId, userId);
-        handleMessage(new SocketEvent(SocketEvent.Event.DISCONNECTED), roomId, userId);
         sessions.get(roomId).remove(userId);
+        handleMessage(new SocketEvent(SocketEvent.Event.DISCONNECTED), roomId, userId);
     }
 
     @OnError
@@ -71,12 +76,21 @@ public class ChatSocket {
                 broadcast(roomId, socketEvent);
             }
             case CONNECTED -> {
-                var roomData = roomSvc.insertUser(roomId, userId);
-                socketEvent.setData(roomData);
+                //Join room - action
+                var userData = userSvc.findById(userId);
+                socketEvent.setEvent(SocketEvent.Event.JOIN_ROOM);
+                socketEvent.setData(UserHelper.toVO(userData));
                 broadcast(roomId, socketEvent);
+
+                //add user into room
+                var roomData = roomSvc.insertUser(roomId, userId);
+                socketEvent.setEvent(SocketEvent.Event.CONNECTED);
+                socketEvent.setData(roomData);
+                singleResponse(roomId, userId, socketEvent);
             }
             case DISCONNECTED -> {
-                socketEvent.setData(userId);
+                var userData = userSvc.findById(userId);
+                socketEvent.setData(UserHelper.toVO(userData));
                 broadcast(roomId, socketEvent);
             }
             default -> singleResponse(roomId, userId, socketEvent);
