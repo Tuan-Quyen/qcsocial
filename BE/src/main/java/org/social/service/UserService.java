@@ -11,10 +11,13 @@ import org.social.repository.UserRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.core.SecurityContext;
 import java.util.List;
 
 @ApplicationScoped
-public class UserService {
+public class UserService implements UserInterface{
+    @Inject
+    TokenUtils tokenUtils;
     @Inject
     UserRepository userRepo;
 
@@ -66,10 +69,35 @@ public class UserService {
         userRepo.delete(entity);
     }
 
-    public void handleLogin(String userName, String password) {
-        var isSuccess = userRepo.login(userName, password);
-        if (!isSuccess) {
-            throw new UnauthorizedException("UserName or password is incorrect.");
+    public User handleLogin(String userName, String password) {
+        var user = findByUser(userName);
+        if (!user.getPassword().equals(password)) {
+            throw new UnauthorizedException("Password is incorrect.");
         }
+        user.setAccessToken(tokenUtils.generateToken(user.id.toString()));
+        user.setRefreshToken(tokenUtils.generateRefreshToken(user.id.toString()));
+        user.setOnline(true);
+        user.persistOrUpdate();
+        return user;
+    }
+
+
+    public String refreshToken(SecurityContext ctx) {
+        return tokenUtils.refreshToken(ctx, (user, token) -> {
+            user.setAccessToken(token);
+            user.persistOrUpdate();
+        });
+    }
+    public void handleLogout(SecurityContext ctx) {
+        tokenUtils.clearToken(ctx, user -> {
+            user.setAccessToken(null);
+            user.setOnline(true);
+            user.persistOrUpdate();
+        });
+    }
+
+    @Override
+    public User findUserById(String id) {
+        return findById(id);
     }
 }

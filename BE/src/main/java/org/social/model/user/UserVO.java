@@ -12,6 +12,8 @@ public class UserVO {
     private String name;
     private String userName;
     private String password;
+    private String accessToken;
+    private String refreshToken;
     private String email;
-    private boolean isOnline;
+    private boolean online;
 }

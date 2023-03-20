@@ -13,5 +13,7 @@ public class User extends PanacheMongoEntity {
     private String userName;
     private String password;
     private String email;
+    private String accessToken;
+    private String refreshToken;
     private boolean isOnline;
 }

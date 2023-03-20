@@ -6,10 +6,13 @@ import org.social.model.room.Room;
 import org.social.model.room.RoomVO;
 import org.social.service.RoomService;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.util.List;
 
 @Path("/api/rooms")
@@ -18,38 +21,43 @@ public class RoomController extends BaseController<RoomVO> {
     RoomService roomService;
 
     @GET
-    public Uni<Response> getAll() {
-        return resFindAll();
+    @RolesAllowed("user")
+    public Uni<Response> getAll(@Context SecurityContext ctx) {
+        return resFindAll(ctx);
     }
 
     @GET
     @Path("/search")
-    public Uni<Response> search(@QueryParam("name") String name, @QueryParam("id") Long id) {
+    @RolesAllowed("user")
+    public Uni<Response> search(@Context SecurityContext ctx, @QueryParam("name") String name, @QueryParam("id") Long id) {
         if (id != null) {
-            return resFindBy("id", id);
+            return resFindBy(ctx, "id", id);
         }
-        return resFindBy("name", name);
+        return resFindBy(ctx, "name", name);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> create(RoomVO vo) {
-        return resCreate(vo);
+    @RolesAllowed("user")
+    public Uni<Response> create(@Context SecurityContext ctx, RoomVO vo) {
+        return resCreate(ctx, vo);
     }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> update(RoomVO vo) {
-        return resUpdate(vo);
+    @RolesAllowed("user")
+    public Uni<Response> update(@Context SecurityContext ctx, RoomVO vo) {
+        return resUpdate(ctx, vo);
     }
 
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> delete(@QueryParam("name") String name, @QueryParam("id") String id) {
+    @RolesAllowed("user")
+    public Uni<Response> delete(@Context SecurityContext ctx, @QueryParam("name") String name, @QueryParam("id") String id) {
         if (id != null) {
-            return resDeleteId(id);
+            return resDeleteId(ctx, id);
         }
-        return resDelete(name);
+        return resDelete(ctx, name);
     }
 
     @Override

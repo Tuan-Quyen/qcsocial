@@ -22,8 +22,19 @@ public class UserHelper {
         var vo = new UserVO();
         vo.setId(entity.id.toString());
         vo.setName(entity.getName());
-        vo.setEmail(vo.getEmail());
+        vo.setEmail(entity.getEmail());
         vo.setUserName(entity.getUserName());
+        return vo;
+    }
+
+    public static UserVO toVOIncludeToken(User entity) {
+        var vo = new UserVO();
+        vo.setId(entity.id.toString());
+        vo.setName(entity.getName());
+        vo.setEmail(entity.getEmail());
+        vo.setUserName(entity.getUserName());
+        vo.setAccessToken(entity.getAccessToken());
+        vo.setRefreshToken(entity.getRefreshToken());
         return vo;
     }
 }
