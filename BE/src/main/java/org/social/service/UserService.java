@@ -91,6 +91,7 @@ public class UserService implements UserInterface{
     public void handleLogout(SecurityContext ctx) {
         tokenUtils.clearToken(ctx, user -> {
             user.setAccessToken(null);
+            user.setRefreshToken(null);
             user.setOnline(true);
             user.persistOrUpdate();
         });

@@ -172,7 +172,7 @@ class App extends StatelessWidget {
           theme: CustomWidget.themeData(),
           darkTheme: CustomWidget.themeData(isDark: true),
           themeMode: _settingProvider.themeMode,
-          initialRoute: RouteUtils.login,
+          initialRoute: RouteUtils.room,
           routes: RouteUtils().routePages(),
         );
       },
